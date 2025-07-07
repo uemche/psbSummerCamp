@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форма регистрации</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .registration-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+        
+        .error {
+            color: #e53e3e;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+        }
+        
+        .checkbox-container input {
+            margin-right: 10px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #3182ce;
+        }
+        
+        button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+        
+        .success-message {
+            text-align: center;
+            color: #38a169;
+            font-weight: 500;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .input-invalid {
+            border-color: #fc8181;
+        }
+    </style>
+</head>
+<body>
+    <div class="registration-container">
+        <h1>Регистрация</h1>
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="name">Имя*</label>
+                <input type="text" id="name" placeholder="Введите ваше имя">
+                <div id="name-error" class="error">Имя должно содержать минимум 2 символа</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email*</label>
+                <input type="email" id="email" placeholder="Введите ваш email">
+                <div id="email-error" class="error">Введите корректный email (должен содержать @)</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Пароль*</label>
+                <input type="password" id="password" placeholder="Придумайте пароль">
+                <div id="password-error" class="error">Пароль должен быть не менее 8 символов и содержать цифры и буквы</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm-password">Повторите пароль*</label>
+                <input type="password" id="confirm-password" placeholder="Повторите пароль">
+                <div id="confirm-error" class="error">Пароли не совпадают</div>
+            </div>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="terms">
+                <label for="terms">Я согласен с условиями пользования</label>
+            </div>
+            <div id="terms-error" class="error">Необходимо согласие с условиями</div>
+            
+            <button type="submit" id="submit-btn" disabled>Зарегистрироваться</button>
+            <div id="success-message" class="success-message">Регистрация успешно завершена!</div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Получаем элементы DOM
+            const form = document.getElementById('registrationForm');
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const confirmInput = document.getElementById('confirm-password');
+            const termsCheckbox = document.getElementById('terms');
+            const submitBtn = document.getElementById('submit-btn');
+            const successMessage = document.getElementById('success-message');
+            
+            // Элементы для ошибок
+            const nameError = document.getElementById('name-error');
+            const emailError = document.getElementById('email-error');
+            const passwordError = document.getElementById('password-error');
+            const confirmError = document.getElementById('confirm-error');
+            const termsError = document.getElementById('terms-error');
+            
+            // Флаги валидности
+            let isNameValid = false;
+            let isEmailValid = false;
+            let isPasswordValid = false;
+            let isConfirmValid = false;
+            let isTermsAccepted = false;
+            
+            // Валидация имени
+            nameInput.addEventListener('input', () => {
+                const name = nameInput.value.trim();
+                isNameValid = name.length >= 2;
+                
+                if (!isNameValid && name.length > 0) {
+                    showError(nameInput, nameError);
+                } else {
+                    clearError(nameInput, nameError);
+                }
+                validateForm();
+            });
+            
+            // Валидация email
+            emailInput.addEventListener('input', () => {
+                const email = emailInput.value.trim();
+                isEmailValid = email.includes('@') && email.length > 3;
+                
+                if (!isEmailValid && email.length > 0) {
+                    showError(emailInput, emailError);
+                } else {
+                    clearError(emailInput, emailError);
+                }
+                validateForm();
+            });
+            
+            // Валидация пароля
+            passwordInput.addEventListener('input', () => {
+                const password = passwordInput.value;
+                const hasLetters = /[a-zA-Zа-яА-Я]/.test(password);
+                const hasNumbers = /[0-9]/.test(password);
+                
+                isPasswordValid = password.length >= 8 && hasLetters && hasNumbers;
+                
+                if (!isPasswordValid && password.length > 0) {
+                    showError(passwordInput, passwordError);
+                } else {
+                    clearError(passwordInput, passwordError);
+                }
+                
+                // Проверяем подтверждение пароля при изменении основного
+                validateConfirmPassword();
+                validateForm();
+            });
+            
+            // Валидация подтверждения пароля
+            confirmInput.addEventListener('input', validateConfirmPassword);
+            
+            function validateConfirmPassword() {
+                const password = passwordInput.value;
+                const confirm = confirmInput.value;
+                
+                isConfirmValid = password === confirm && password !== '';
+                
+                if (!isConfirmValid && confirm.length > 0) {
+                    showError(confirmInput, confirmError);
+                } else {
+                    clearError(confirmInput, confirmError);
+                }
+                validateForm();
+            }
+            
+            // Валидация чекбокса
+            termsCheckbox.addEventListener('change', () => {
+                isTermsAccepted = termsCheckbox.checked;
+                
+                if (!isTermsAccepted) {
+                    termsError.style.display = 'block';
+                } else {
+                    termsError.style.display = 'none';
+                }
+                validateForm();
+            });
+            
+            // Активация/деактивация кнопки
+            function validateForm() {
+                const isValid = isNameValid && isEmailValid && 
+                               isPasswordValid && isConfirmValid && 
+                               isTermsAccepted;
+                
+                submitBtn.disabled = !isValid;
+            }
+            
+            // Вспомогательные функции для ошибок
+            function showError(input, errorElement) {
+                input.classList.add('input-invalid');
+                errorElement.style.display = 'block';
+            }
+            
+            function clearError(input, errorElement) {
+                input.classList.remove('input-invalid');
+                errorElement.style.display = 'none';
+            }
+            
+            // Обработка отправки формы
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Фиксация текущего состояния перед отправкой
+                isNameValid = nameInput.value.trim().length >= 2;
+                isEmailValid = emailInput.value.includes('@');
+                isTermsAccepted = termsCheckbox.checked;
+                
+                // Дополнительная проверка паролей
+                validateConfirmPassword();
+                
+                // Проверка всех условий
+                if (isNameValid && isEmailValid && isPasswordValid && 
+                    isConfirmValid && isTermsAccepted) {
+                    
+                    // Здесь обычно отправка данных на сервер
+                    // Покажем сообщение об успехе
+                    successMessage.style.display = 'block';
+                    
+                    // Сброс формы
+                    setTimeout(() => {
+                        form.reset();
+                        successMessage.style.display = 'none';
+                        submitBtn.disabled = true;
+                        
+                        // Сброс визуальных состояний
+                        clearError(nameInput, nameError);
+                        clearError(emailInput, emailError);
+                        clearError(passwordInput, passwordError);
+                        clearError(confirmInput, confirmError);
+                        termsError.style.display = 'none';
+                        
+                        // Сброс флагов
+                        isNameValid = isEmailValid = isPasswordValid = 
+                        isConfirmValid = isTermsAccepted = false;
+                    }, 2000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
