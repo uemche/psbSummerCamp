@@ -377,7 +377,7 @@
                 isPhoneValid = phonePattern.test(value);
                 
                 if (!isPhoneValid && value.length > 0) {
-                    showError(phoneInput, phoneError, 'Формат: +7 XXXXXX-XX-XX (можно использовать буквы и цифры)');
+                    showError(phoneInput, phoneError, 'Формат: +7 XXXXXX-XX-XX');
                 } else {
                     clearError(phoneInput, phoneError);
                 }
